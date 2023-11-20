@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datei-Upload</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #e8e8e8; /* Dunkleres Grau für besseren Kontrast */
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.title {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #555;
+    text-align: center;
+    font-weight: bold;
+}
+
+input[type="file"] {
+    margin-bottom: 20px;
+    display: block;
+    width: 100%;
+}
+    
+    #fileInput {
+    padding: 15px 30px; /* Größeres Padding für bessere Berührbarkeit */
+    font-size: 18px; /* Größere Schrift */
+    margin: 20px auto; /* Vertikaler Abstand und zentrieren */
+    display: block; /* Blockelement, um Auto-Margin zu ermöglichen */
+    width: auto; /* Natürliche Breite basierend auf Inhalt */
+    cursor: pointer; /* Cursor-Stil ändern, wenn Maus darüber ist */
+    border-radius: 5px; /* Abgerundete Ecken */
+    border: 2px solid #007bff; /* Blauer Rand */
+    color: #007bff; /* Blaue Textfarbe */
+    background-color: white; /* Weißer Hintergrund */
+    text-align: center; /* Zentrierter Text */
+    box-sizing: border-box; /* Damit Padding und Border in der Breite enthalten sind */
+}
+
+/* Stil für den Hover-Effekt */
+#fileInput:hover {
+    background-color: #e7f3ff; /* Leichter blauer Hintergrund beim Überfahren mit der Maus */
+    border-color: #0056b3; /* Dunklere blaue Farbe beim Überfahren mit der Maus */
+}
+    
+button {
+    padding: 10px 20px; /* Größeres Padding für bessere Berührbarkeit */
+    background-color: #007bff; /* Blaue Hintergrundfarbe */
+    color: white; /* Weiße Textfarbe */
+    border: none; /* Kein Rand */
+    border-radius: 5px; /* Abgerundete Ecken */
+    font-size: 16px; /* Größere Schrift */
+    cursor: pointer; /* Cursor-Stil ändern, wenn Maus darüber ist */
+    margin: 10px 0; /* Etwas Abstand oben und unten */
+    width: 100%; /* Volle Breite innerhalb des Containers */
+    box-sizing: border-box; /* Damit Padding und Border in der Breite enthalten sind */
+    transition: background-color 0.3s; /* Übergang für den Hover-Effekt */
+}
+
+button:hover {
+    background-color: #0056b3; /* Dunklere blaue Farbe beim Überfahren mit der Maus */
+}
+
+/* Stil für das Zentrieren der Buttons */
+.manualInputButtonContainer {
+    display: flex;
+    justify-content: center; /* Zentriert den Button horizontal */
+    align-items: center; /* Zentriert den Button vertikal */
+    margin-top: 10px; /* Etwas Abstand zum vorherigen Element */
+}
+
+#progressBar, #abdominellProgressBar, #geburtshilfeProgressBar, #sectioProgressBar, #kinderProgressBar, #kopfHalsProgressBar, #ambulantProgressBar, #rueckenmarksnaheProgressBar, #periphereProgressBar, #intrathorakalProgressBar, #intrakraniellProgressBar, #fiberoptischProgressBar, #cprProgressBar, #zentralvenoesProgressBar, #transfusionenProgressBar, #asa3ProgressBar {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#progressBarFill, #abdominellProgressBarFill, #geburtshilfeProgressBarFill, #sectioProgressBarFill, #kinderProgressBarFill, #kopfHalsProgressBarFill, #ambulantProgressBarFill, #rueckenmarksnaheProgressBarFill, #periphereProgressBarFill, #intrathorakalProgressBarFill, #intrakraniellProgressBarFill, #fiberoptischProgressBarFill, #cprProgressBarFill, #zentralvenoesProgressBarFill, #transfusionenProgressBarFill, #asa3ProgressBarFill {
+    height: 30px;
+    width: 0%;
+    background-color: red; /* Startfarbe für alle Progress Bars */
+    text-align: center;
+    line-height: 30px;
+    color: white;
+    border-radius: 5px;
+    transition: width 0.4s ease-in-out;
+}
+
+@media (max-width: 600px) {
+    .title {
+        font-size: 14px;
+    }
+
+    #progressBarFill, #abdominellProgressBarFill, #geburtshilfeProgressBarFill, #sectioProgressBarFill, #kinderProgressBarFill, #kopfHalsProgressBarFill, #ambulantProgressBarFill, #rueckenmarksnaheProgressBarFill, #periphereProgressBarFill, #intrathorakalProgressBarFill, #intrakraniellProgressBarFill, #fiberoptischProgressBarFill, #cprProgressBarFill, #zentralvenoesProgressBarFill, #transfusionenProgressBarFill, #asa3ProgressBarFill {
+        height: 20px;
+        line-height: 20px;
+    }
+}
+
+#manualInputDialog {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: 20%; /* Erhöhen Sie die Breite bei Bedarf */
+    max-height: 90vh !important;
+    overflow-y: auto; /* Scrollbalken bei Bedarf */
+}
+
+#manualInputDialog input[type="number"] {
+    width: 50px;
+    margin-right: 10px; /* Abstand zwischen Textfeld und Beschriftung */
+}
+
+#manualInputDialog div {
+    margin-bottom: 10px; /* Abstand zwischen den Eingabefeldern */
+}
+    
+    #chartModal #chartContainer {
+    width: 60%; /* Anpassen für die optimale Größe */
+    margin: 20px auto;
+}
+
+#manualInputBtn, #additionalStatsBtn {
+    max-width: 300px; /* Oder eine andere gewünschte Breite */
+    margin: 10px auto; /* Zentriert den Button und fügt oben und unten etwas Abstand hinzu */
+    display: block; /* Stellt sicher, dass der Button als Block-Element behandelt wird, damit margin: auto funktioniert */
+}
+
+    
+#chartModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: auto; /* Breite an den Inhalt anpassen */
+    max-height: 80vh; /* Maximale Höhe auf 80% der Viewport-Höhe festlegen */
+    overflow-y: auto;
+    display: none; /* Standardmäßig versteckt */
+}
+
+
+.chart-label {
+    width: 50px;
+    margin-right: 10px;
+}
+
+.chart-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.chart-navigation button {
+    padding: 5px 10px;
+    background-color: lightgray;
+    border: 1px solid gray;
+    cursor: pointer;
+}
+
+.chart-navigation button:hover {
+    background-color: gray;
+}
+
+@media (max-width: 600px) {
+    #chartModal {
+        width: 90%; /* Breiter auf kleinen Bildschirmen */
+    }
+}
+    .info-icon {
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+#infoModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+    
+    #cprInfoModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+#catheterInfoModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+#transfusionInfoModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+    
+    #asa3InfoModal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+}
+footer {
+    text-align: center;
+}
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <input type="file" id="fileInput" accept=".html">
+        
+        <hr> <!-- Neuer Divider -->
+        
+        <div class="title">Narkoseverfahren insgesamt</div>
+        <div id="progressBar">
+            <div id="progressBarFill">0%</div>
+        </div>
+        
+        <hr> <!-- Divider -->
+
+        <div id="projection">Projektion wird berechnet...</div>
+
+        <hr> <!-- Neuer Divider -->
+        
+        <div class="title">Abdominelle Eingriffe</div>
+        <div id="abdominellProgressBar">
+            <div id="abdominellProgressBarFill">0% - 0/300</div>
+        </div>
+
+        <hr> <!-- Neuer Divider -->
+        
+        <div class="title">Geburtshilfliche Eingriffe</div>
+        <div id="geburtshilfeProgressBar">
+            <div id="geburtshilfeProgressBarFill">0% - 0/50</div>
+        </div>
+        <hr> <!-- Neuer Divider -->
+
+<div class="title">Sectiones</div>
+<div id="sectioProgressBar">
+    <div id="sectioProgressBarFill">0% - 0/25</div>
+</div>
+        <hr> <!-- Neuer Divider -->
+
+<div class="title">Kinder-Eingriffe</div>
+<div id="kinderProgressBar">
+    <div id="kinderProgressBarFill">0% - 0/50</div>
+</div>
+        <hr> <!-- Neuer Divider -->
+
+<div class="title">Kopf-Hals-Eingriffe</div>
+<div id="kopfHalsProgressBar">
+    <div id="kopfHalsProgressBarFill">0% - 0/100</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Ambulante Eingriffe</div>
+<div id="ambulantProgressBar">
+    <div id="ambulantProgressBarFill">0% - 0/100</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Rückenmarksnahe Regionalanästhesien</div>
+<div id="rueckenmarksnaheProgressBar">
+    <div id="rueckenmarksnaheProgressBarFill">0% - 0/100</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Periphere Regionalanästhesien</div>
+<div id="periphereProgressBar">
+    <div id="periphereProgressBarFill">0% - 0/50</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Intrathorakale Eingriffe</div>
+<div id="intrathorakalProgressBar">
+    <div id="intrathorakalProgressBarFill">0% - 0/25</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Intrakranielle Eingriffe</div>
+<div id="intrakraniellProgressBar">
+    <div id="intrakraniellProgressBarFill">0% - 0/25</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Fiberoptische Intubationsverfahren 
+    <span class="info-icon" onclick="openInfoPopup()">ℹ️</span>
+</div>
+
+<!-- Popup-Modal für Informationen -->
+<div id="infoModal" style="display: none;">
+    <p>In der neuen WBO (2020) werden keine 50 fiberoptichen Intubationsverfahren mehr verlangt, sondern: 45 fiberoptische Techniken einschließlich fiberoptische Intubationen, davon können bis zu 50% durch Simulation erfolgen, sowie videoassistierte Intubationsverfahren.</p>
+    <button onclick="closeInfoPopup()">Schließen</button>
+</div>
+<div id="fiberoptischProgressBar">
+    <div id="fiberoptischProgressBarFill">0% - 0/25</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Kardiopulmonale Reanimation
+    <span class="info-icon" onclick="openCPRInfoPopup()">ℹ️</span>
+</div>
+
+<!-- Popup-Modal für CPR-Informationen -->
+<div id="cprInfoModal" style="display: none;">
+    <p>Die neue WBO (2020) fordert keine 10 Reanimationen mehr, sondern die nicht quantifizierte allgemeine Handlungskompetenz bei Reanimation von Patienten aller Altersgruppen. Dafür fordert sie 5 Zwischenfalltrainings. Diese Trainings sind auf unseren Protokollen nicht abgebildet und müssen selbst gezählt werden.</p>
+    <button onclick="closeCPRInfoPopup()">Schließen</button>
+</div>
+<div id="cprProgressBar">
+    <div id="cprProgressBarFill">0% - 0/10</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+
+<div class="title">Zentralvenöse Katheterisierungen
+    <span class="info-icon" onclick="openCatheterInfoPopup()">ℹ️</span>
+</div>
+
+<!-- Popup-Modal für Zentralvenöse Katheterisierungen -->
+<div id="catheterInfoModal" style="display: none;">
+    <p>Die neue WBO (2020) fordert nicht 50, sondern nur 30 zentrale Punktionen. Zusätzlich jedoch 30 arterielle Punktionen, 5 Pleurapunktionen, -Drainagen und 25 Tracheo-, Bronchoskopien. Diese Punkte werden in unseren Protokollen nicht abgebildet und müssen selbst gezählt werden.</p>
+    <button onclick="closeCatheterInfoPopup()">Schließen</button>
+</div>
+<div id="zentralvenoesProgressBar">
+    <div id="zentralvenoesProgressBarFill">0% - 0/50</div>
+</div>
+<hr> <!-- Neuer Divider -->
+
+<div class="title">Transfusionen
+    <span class="info-icon" onclick="openTransfusionInfoPopup()">ℹ️</span>
+</div>
+
+<!-- Popup-Modal für Transfusions-Informationen -->
+<div id="transfusionInfoModal" style="display: none;">
+    <p>Die neue WBO (2020) fordert keine konkrete Anzahl an Transfusionen mehr, sondern eine entsprechende allgemeine Handlungskompetenz.</p>
+    <button onclick="closeTransfusionInfoPopup()">Schließen</button>
+</div>
+<div id="transfusionenProgressBar">
+    <div id="transfusionenProgressBarFill">0% - 0/50</div>
+</div>
+        <hr> <!-- Neuer Divider -->
+
+<div class="title">Narkosen bei ASA ≥3
+    <span class="info-icon" onclick="openASA3InfoPopup()">ℹ️</span>
+</div>
+
+<!-- Popup-Modal für ASA ≥3 Informationen -->
+<div id="asa3InfoModal" style="display: none;">
+    <p>Die neue WBO (2020) fordert 100 Narkosen bei Patienten mit ASA ≥ 3, in der alten WBO (2005) ist diese konkrete Anforderung nicht enthalten.</p>
+    <button onclick="closeASA3InfoPopup()">Schließen</button>
+</div>
+<div id="asa3ProgressBar">
+    <div id="asa3ProgressBarFill">0% - 0/100</div>
+</div>
+        <hr> <!-- Neuer Divider -->
+<!-- Schaltfläche für manuelle Eingabe -->
+<button id="manualInputBtn">Manuelle Eingabe</button>
+
+<!-- Modal für manuelle Eingaben -->
+<div id="manualInputDialog" style="display:none;">
+    <div>Narkoseverfahren: <input type="number" id="manualNarkose"></div>
+    <div>Abdominelle Eingriffe: <input type="number" id="manualAbdominell"></div>
+    <div>Geburtshilfliche Eingriffe: <input type="number" id="manualGeburtshilfe"></div>
+    <div>Sectio: <input type="number" id="manualSectio"></div>
+    <div>Kinder-Eingriffe: <input type="number" id="manualKinder"></div>
+    <div>Kopf-Hals-Eingriffe: <input type="number" id="manualKopfHals"></div>
+    <div>Ambulante Eingriffe: <input type="number" id="manualAmbulant"></div>
+    <div>Rückenmarksnahe Regionalanästhesien: <input type="number" id="manualRueckenmarksnahe"></div>
+    <div>Periphere Regionalanästhesien: <input type="number" id="manualPeriphere"></div>
+    <div>Intrathorakale Eingriffe: <input type="number" id="manualIntrathorakal"></div>
+    <div>Intrakranielle Eingriffe: <input type="number" id="manualIntrakraniell"></div>
+    <div>Fiberoptische Intubationsverfahren: <input type="number" id="manualFiberoptisch"></div>
+    <div>CPR: <input type="number" id="manualCPR"></div>
+    <div>Zentralvenöse Katheterisierungen: <input type="number" id="manualZentralvenoes"></div>
+    <div>Transfusionen: <input type="number" id="manualTransfusionen"></div>
+    <button id="updateValuesBtn">OK</button>
+</div>
+   
+<button id="additionalStatsBtn">Zusätzliche Statistiken</button>
+    
+<div id="chartModal">
+    <div id="chartContainer" style="display: flex; justify-content: center; width: 75%; margin: auto;">
+        <canvas id="myChart"></canvas> <!-- Canvas-Element hier einfügen -->
+    </div>    
+    <div class="chart-navigation">
+        <button onclick="changeChart(1)">ASA Klassifikation</button>
+        <button onclick="changeChart(2)">Wochentage absolut</button>
+        <button onclick="changeChart(3)">Wochentage durchschnitt</button>
+        <button onclick="changeChart(4)">Fachabteilungen</button>
+        <button onclick="changeChart(5)">RSI-Anteil</button>
+        <button onclick="changeChart(6)">Anästhesieverfahren</button>
+        <button onclick="changeChart(7)">TIVA/Balanciert</button>
+    </div>
+    <button onclick="closeChartModal()">Schließen</button>
+</div>
+<hr> <!-- Divider -->
+<footer>
+    <p>WeiterbildungsZähler - Kontakt: Nico Kluge, 82-8637, n.kluge@asklepios.com</p>
+</footer>
+
+        
+</div>
+
+        
+
+
+    </div>
+
+
+    <script>
+let table; // Globale Variable 
+let columnIndexes = {};
+
+function readHeaderRow(table) {
+    const headerRow = table.rows[0];
+    for (let i = 0; i < headerRow.cells.length; i++) {
+        const columnName = headerRow.cells[i].textContent.trim().toLowerCase();
+        columnIndexes[columnName] = i;
+        console.log(`Spalte '${columnName}' identifiziert bei Index: ${i}`);
+    }
+}
+
+function getColumnIndex(columnName) {
+    return columnIndexes[columnName.toLowerCase()] || -1;
+}
+        
+function convertDateFormat(dateStr) {
+    let formattedDate = dateStr;
+
+    // Erkennung des Formats und Konvertierung
+    if (dateStr.includes('-')) {
+        // Format yyyy-mm-dd
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`; // Umwandlung in dd.mm.yyyy
+        }
+    } else if (dateStr.includes('.')) {
+        // Format dd.mm.yyyy, keine Änderung erforderlich
+    } else {
+        console.error('Unbekanntes Datumformat:', dateStr);
+    }
+
+    return formattedDate;
+}
+        
+function formatTableDates(table, dateColumnIndex) {
+    for (let i = 1; i < table.rows.length; i++) { // Start bei 1, um die Kopfzeile zu überspringen
+        let dateCell = table.rows[i].cells[dateColumnIndex];
+        dateCell.textContent = convertDateFormat(dateCell.textContent);
+    }
+}
+
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, 'text/html');
+            table = doc.querySelector('table'); // Zuweisung zur globalen Variable
+
+            if (table) {
+                readHeaderRow(table); // Kopfzeile auslesen und Spaltenindizes speichern
+                
+                // Datumskorrektur
+                const datumIndex = getColumnIndex('Datum');
+                if (datumIndex !== -1) {
+                    formatTableDates(table, datumIndex); // Datumswerte im gesamten Table korrigieren
+                }
+
+                const weiterbildungIndex = getColumnIndex('Weiterbildung');
+                const aufnahmeStatusIndex = getColumnIndex('Aufnahme-Status');
+
+                const narkoseCount = table.rows.length;
+                const abdominellCount = calculateCount(table, weiterbildungIndex, 'abdominell');
+                const geburtshilfeCount = calculateCount(table, weiterbildungIndex, 'geburtshilfe');
+                const sectioCount = calculateCount(table, weiterbildungIndex, 'sectio');
+                const kinderCount = calculateCount(table, weiterbildungIndex, 'kinder');
+                const kopfHalsCount = calculateCount(table, weiterbildungIndex, 'kopf');
+                const ambulantCount = calculateAmbulantCount(table, aufnahmeStatusIndex, weiterbildungIndex);
+                const rueckenmarksnaheCount = calculateRueckenmarksnaheCount(table, weiterbildungIndex);
+                const periphereCount = calculateCount(table, weiterbildungIndex, 'periphere');
+                const intrathorakalCount = calculateCount(table, weiterbildungIndex, 'intrathorakal');
+                const intrakraniellCount = calculateCount(table, weiterbildungIndex, 'intrakraniell');
+                const fiberoptischCount = calculateCount(table, weiterbildungIndex, 'fiberoptisch');
+                const cprCount = calculateCount(table, weiterbildungIndex, 'reanimation');
+                const zentralvenoesCount = calculateCount(table, weiterbildungIndex, 'zentrale');
+                const transfusionenCount = calculateCount(table, weiterbildungIndex, 'transfusionen');
+                const asa3Count = calculateASA3Count(table, getColumnIndex('ASA'));
+
+                updateProgressBar('progressBarFill', narkoseCount, 1800);
+                updateProgressBar('abdominellProgressBarFill', abdominellCount, 300);
+                updateProgressBar('geburtshilfeProgressBarFill', geburtshilfeCount, 50);
+                updateProgressBar('sectioProgressBarFill', sectioCount, 25);
+                updateProgressBar('kinderProgressBarFill', kinderCount, 50);
+                updateProgressBar('kopfHalsProgressBarFill', kopfHalsCount, 100);
+                updateProgressBar('ambulantProgressBarFill', ambulantCount, 100);
+                updateProgressBar('rueckenmarksnaheProgressBarFill', rueckenmarksnaheCount, 100);
+                updateProgressBar('periphereProgressBarFill', periphereCount, 50);
+                updateProgressBar('intrathorakalProgressBarFill', intrathorakalCount, 25);
+                updateProgressBar('intrakraniellProgressBarFill', intrakraniellCount, 25);
+                updateProgressBar('fiberoptischProgressBarFill', fiberoptischCount, 25);
+                updateProgressBar('cprProgressBarFill', cprCount, 10);
+                updateProgressBar('zentralvenoesProgressBarFill', zentralvenoesCount, 50);
+                updateProgressBar('transfusionenProgressBarFill', transfusionenCount, 50);
+                updateProgressBar('asa3ProgressBarFill', asa3Count, 100);
+
+                calculateProjection(table, getColumnIndex('Datum'));
+                
+                romanNumeralCounts = countRomanNumerals(table, getColumnIndex('ASA'));
+            } else {
+                alert('Keine Tabelle in der Datei gefunden!');
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+});
+
+function calculateAmbulantCount(table, aufnahmeStatusIndex, weiterbildungIndex) {
+    let count = 0;
+    for (let i = 0; i < table.rows.length; i++) {
+        const aufnahmeStatusCell = table.rows[i].cells[aufnahmeStatusIndex];
+        const weiterbildungCell = table.rows[i].cells[weiterbildungIndex];
+        const aufnahmeStatus = aufnahmeStatusCell ? aufnahmeStatusCell.textContent.toLowerCase() : '';
+        const weiterbildung = weiterbildungCell ? weiterbildungCell.textContent.toLowerCase() : '';
+
+        if (aufnahmeStatus.includes('ambulant') || weiterbildung.includes('ambulant')) {
+            count++;
+        }
+    }
+    return count;
+}
+
+        
+function calculateASA3Count(table) {
+    let count = 0;
+
+    const asaIndex = getColumnIndex('ASA');
+    if (asaIndex === -1) {
+        console.error("Spalte 'ASA' nicht gefunden.");
+        return 0;
+    }
+
+    for (let i = 0; i < table.rows.length; i++) {
+        const cellValue = table.rows[i].cells[asaIndex].textContent;
+        if (['III', 'IV', 'V'].includes(cellValue.trim())) {
+            count++;
+        }
+    }
+    return count;
+}
+
+
+        
+function calculateRueckenmarksnaheCount(table) {
+    let count = 0;
+
+    const weiterbildungIndex = getColumnIndex('Weiterbildung');
+    const anTeRegionalIndex = getColumnIndex('AnTe Regional');
+
+    if (weiterbildungIndex === -1 || anTeRegionalIndex === -1) {
+        console.error(`Eine oder beide Spalten 'Weiterbildung' und 'AnTe Regional' nicht gefunden.`);
+        return 0;
+    }
+
+    for (let i = 0; i < table.rows.length; i++) {
+        const spalteWeiterbildung = table.rows[i].cells[weiterbildungIndex].textContent.toLowerCase();
+        const spalteAnTeRegional = table.rows[i].cells[anTeRegionalIndex].textContent.toLowerCase();
+        if (spalteWeiterbildung.includes('rückenmarksnahe') || spalteAnTeRegional.includes('pda') || spalteAnTeRegional.includes('spa')) {
+            count++;
+        }
+    }
+    return count;
+}
+
+
+function updateProgressBar(progressBarId, count, maxCount) {
+    const percentage = Math.min(count / maxCount * 100, 100);
+    const progressBarFill = document.getElementById(progressBarId);
+    progressBarFill.style.width = percentage + '%';
+
+    // Farbübergang von Rot zu Grün
+    const green = Math.round(255 * percentage / 100);
+    const red = 255 - green;
+    progressBarFill.style.backgroundColor = `rgb(${red}, ${green}, 0)`;
+
+    progressBarFill.textContent = `${percentage.toFixed(2)}% - ${count}/${maxCount}`;
+}
+
+function calculateCount(table, columnIndex, searchString) {
+    let count = 0;
+    for (let i = 0; i < table.rows.length; i++) {
+        const cell = table.rows[i].cells[columnIndex];
+        if (cell && cell.textContent.toLowerCase().includes(searchString.toLowerCase())) {
+            count++;
+        }
+    }
+    return count;
+}
+        function calculateProjection(table) {
+    const earliestDate = findEarliestDate(table);
+    const projectionElement = document.getElementById('projection'); 
+
+    if (earliestDate) {
+        const projectionDate = new Date(earliestDate);
+        projectionDate.setFullYear(projectionDate.getFullYear() + 5);
+        const currentDate = new Date();
+        const rowCount = table.rows.length;
+
+        const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedEarliestDate = earliestDate.toLocaleDateString('de-DE', formatOptions);
+        const formattedProjectionDate = projectionDate.toLocaleDateString('de-DE', formatOptions);
+
+        if (currentDate > projectionDate) {
+            projectionElement.textContent = `Du hast deine Weiterbildungszeit bereits voll. Du hast ${rowCount} Verfahren durchgeführt. Dein erstes Verfahren war am ${formattedEarliestDate}.`;
+        } else {
+            const daysSinceEarliest = (currentDate - earliestDate) / (1000 * 60 * 60 * 24);
+            const daysTotal = (projectionDate - earliestDate) / (1000 * 60 * 60 * 24);
+            const projectedCount = 1800 * daysSinceEarliest / daysTotal;
+
+            if (rowCount >= projectedCount) {
+                projectionElement.textContent = `Noaice! Deine erste Narkose war am ${formattedEarliestDate}. Wenn du so weiter machst, hast du am ${formattedProjectionDate} insgesamt ${Math.round(projectedCount)} Verfahren durchgeführt.`;
+            } else {
+                const missingCount = 1800 - Math.round(projectedCount);
+                projectionElement.textContent = `Obacht Mensch! Deine erste Narkose war am ${formattedEarliestDate}. Wenn du so weiter machst wie bisher, hast du am ${formattedProjectionDate} nur ${Math.round(projectedCount)} erreicht. Dann fehlen dir noch ${missingCount} Verfahren.`;
+            }
+        }
+    } else {
+        projectionElement.textContent = 'Kein gültiges Datum in der Tabelle gefunden.';
+    }
+}
+
+function findEarliestDate(table) {
+    let earliestDate = null;
+
+    const datumIndex = getColumnIndex('Datum');
+    if (datumIndex === -1) {
+        console.error("Spalte 'Datum' nicht gefunden.");
+        return null;
+    }
+
+    for (let i = 0; i < table.rows.length; i++) {
+        const dateStr = table.rows[i].cells[datumIndex] ? table.rows[i].cells[datumIndex].textContent : '';
+        const dateParts = dateStr.split('.');
+        if (dateParts.length === 3) {
+            const year = parseInt(dateParts[2], 10);
+            const month = parseInt(dateParts[1], 10) - 1; // Monat beginnt bei 0 in JavaScript
+            const day = parseInt(dateParts[0], 10);
+            const date = new Date(year, month, day);
+            if (!isNaN(date) && (!earliestDate || date < earliestDate)) {
+                earliestDate = date;
+            }
+        }
+    }
+    return earliestDate;
+}
+
+
+
+        document.getElementById('manualInputBtn').addEventListener('click', function() {
+    // Dialogfenster anzeigen
+    document.getElementById('manualInputDialog').style.display = 'block';
+});
+
+document.getElementById('updateValuesBtn').addEventListener('click', function() {
+    // Werte aus den Textfeldern holen und zu den aktuellen Werten der Progress Bars addieren
+    const manualInputs = [
+        { id: 'manualNarkose', progressBarId: 'progressBarFill', maxCount: 1800 },
+        { id: 'manualAbdominell', progressBarId: 'abdominellProgressBarFill', maxCount: 300 },
+        { id: 'manualGeburtshilfe', progressBarId: 'geburtshilfeProgressBarFill', maxCount: 50 },
+        { id: 'manualSectio', progressBarId: 'sectioProgressBarFill', maxCount: 25 },
+        { id: 'manualKinder', progressBarId: 'kinderProgressBarFill', maxCount: 50 },
+        { id: 'manualKopfHals', progressBarId: 'kopfHalsProgressBarFill', maxCount: 100 },
+        { id: 'manualAmbulant', progressBarId: 'ambulantProgressBarFill', maxCount: 100 },
+        { id: 'manualRueckenmarksnahe', progressBarId: 'rueckenmarksnaheProgressBarFill', maxCount: 100 },
+        { id: 'manualPeriphere', progressBarId: 'periphereProgressBarFill', maxCount: 50 },
+        { id: 'manualIntrathorakal', progressBarId: 'intrathorakalProgressBarFill', maxCount: 25 },
+        { id: 'manualIntrakraniell', progressBarId: 'intrakraniellProgressBarFill', maxCount: 25 },
+        { id: 'manualFiberoptisch', progressBarId: 'fiberoptischProgressBarFill', maxCount: 25 },
+        { id: 'manualCPR', progressBarId: 'cprProgressBarFill', maxCount: 10 },
+        { id: 'manualZentralvenoes', progressBarId: 'zentralvenoesProgressBarFill', maxCount: 50 },
+        { id: 'manualTransfusionen', progressBarId: 'transfusionenProgressBarFill', maxCount: 50 }
+    ];
+
+    manualInputs.forEach(input => {
+        const additionalCount = parseInt(document.getElementById(input.id).value) || 0;
+        const currentCount = getCurrentCount(input.progressBarId);
+        updateProgressBar(input.progressBarId, currentCount + additionalCount, input.maxCount);
+    });
+
+    // Dialogfenster schließen
+    document.getElementById('manualInputDialog').style.display = 'none';
+});
+
+function getCurrentCount(progressBarId) {
+    const progressBarFill = document.getElementById(progressBarId);
+    const textContent = progressBarFill.textContent || '';
+    const match = textContent.match(/(\d+)\/\d+/);
+    return match ? parseInt(match[1], 10) : 0;
+}
+
+        let currentChart = null;
+
+document.getElementById('additionalStatsBtn').addEventListener('click', function() {
+    document.getElementById('chartModal').style.display = 'block';
+    changeChart(1); // Standardmäßig das erste Diagramm anzeigen
+});
+
+function changeChart(chartNumber) {
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    // Zerstöre das aktuelle Diagramm, wenn es existiert
+    if (currentChart) {
+        currentChart.destroy();
+        currentChart = null; // Setze currentChart zurück auf null
+    }
+
+    // Entscheide, welches Diagramm basierend auf der ausgewählten Nummer erstellt werden soll
+    switch(chartNumber) {
+        case 1:
+            currentChart = createChart1(ctx, table);
+            break;
+        case 2:
+            currentChart = createChart2(ctx, table);
+            break;
+        case 3:
+            currentChart = createChart3(ctx, table);
+            break;
+        case 4:
+            currentChart = createChart4(ctx, table);
+            break;
+        case 5:
+            currentChart = createChart5(ctx, table);
+            break;
+        case 6:
+            currentChart = createChart6(ctx, table);
+            break;
+        case 7:
+            currentChart = createChart7(ctx, table);
+            break;
+        default:
+            console.log("Ungültige Diagrammnummer");
+    }
+}
+
+
+
+
+function countRomanNumerals(table) {
+    const counts = { 'I': 0, 'II': 0, 'III': 0, 'IV': 0, 'V': 0 };
+
+    const asaIndex = getColumnIndex('ASA');
+    if (asaIndex === -1) {
+        console.error("Spalte 'ASA' nicht gefunden.");
+        return counts;
+    }
+
+    for (let i = 0; i < table.rows.length; i++) {
+        const cellValue = table.rows[i].cells[asaIndex].textContent.trim();
+        if (counts.hasOwnProperty(cellValue)) {
+            counts[cellValue]++;
+        }
+    }
+
+    return counts;
+}
+
+
+
+function createChart1(ctx, tableData) {
+    // Angenommen, die Tabelle wurde bereits eingelesen und die Daten wurden gezählt
+    const romanNumeralCounts = countRomanNumerals(table);
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(romanNumeralCounts),
+            datasets: [{
+                label: 'Häufigkeit der ASA-Klassen',
+                data: Object.values(romanNumeralCounts),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.4)',
+                    'rgba(54, 162, 235, 0.4)',
+                    'rgba(255, 206, 86, 0.4)',
+                    'rgba(75, 192, 192, 0.4)',
+                    'rgba(153, 102, 255, 0.4)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function countDataByWeekday(table) {
+    const weekdayCounts = { 'Montag': 0, 'Dienstag': 0, 'Mittwoch': 0, 'Donnerstag': 0, 'Freitag': 0, 'Samstag': 0, 'Sonntag': 0 };
+    const weekdays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
+    const datumIndex = getColumnIndex('Datum');
+    if (datumIndex === -1) {
+        console.error("Spalte 'Datum' nicht gefunden.");
+        return weekdayCounts;
+    }
+
+    for (let i = 0; i < table.rows.length; i++) {
+        const dateString = table.rows[i].cells[datumIndex].textContent;
+        const dateParts = dateString.split('.');
+        if (dateParts.length === 3) {
+            const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // Monat in JavaScript ist 0-basiert
+            const weekday = weekdays[date.getDay()];
+            weekdayCounts[weekday]++;
+        }
+    }
+
+    return weekdayCounts;
+}
+
+
+
+function createChart2(ctx, tableData) {
+    const weekdayCounts = countDataByWeekday(tableData);
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(weekdayCounts),
+            datasets: [{
+                label: 'Anzahl der Datensätze pro Wochentag',
+                data: Object.values(weekdayCounts),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.4)', // Rot
+                    'rgba(54, 162, 235, 0.4)', // Blau
+                    'rgba(255, 206, 86, 0.4)', // Gelb
+                    'rgba(75, 192, 192, 0.4)', // Grün
+                    'rgba(153, 102, 255, 0.4)', // Violett
+                    'rgba(255, 159, 64, 0.4)', // Orange
+                    'rgba(255, 105, 180, 0.4)'  // Helles Pink für Sonntag
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(255, 105, 180, 1)'  // Helles Pink für Sonntag
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+
+
+function countProceduresByDate(table) {
+    let counts = {};
+
+    const datumIndex = getColumnIndex('Datum');
+    if (datumIndex === -1) {
+        console.error("Spalte 'Datum' nicht gefunden.");
+        return counts;
+    }
+
+    for (let i = 0; i < table.rows.length; i++) {
+        const dateString = table.rows[i].cells[datumIndex].textContent;
+        counts[dateString] = (counts[dateString] || 0) + 1;
+    }
+
+    return counts;
+}
+
+
+        
+function averageProceduresByWeekday(table) {
+    const countsByDate = countProceduresByDate(table);
+    const weekdayCounts = { 'Montag': 0, 'Dienstag': 0, 'Mittwoch': 0, 'Donnerstag': 0, 'Freitag': 0, 'Samstag': 0, 'Sonntag': 0 };
+    const weekdayTotals = { 'Montag': 0, 'Dienstag': 0, 'Mittwoch': 0, 'Donnerstag': 0, 'Freitag': 0, 'Samstag': 0, 'Sonntag': 0 };
+    const weekdays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
+    for (let date in countsByDate) {
+        const dateParts = date.split('.');
+        if (dateParts.length === 3) {
+            const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+            const weekday = weekdays[dateObj.getDay()];
+            weekdayTotals[weekday]++;
+            weekdayCounts[weekday] += countsByDate[date];
+        }
+    }
+
+    let averages = {};
+    for (let day in weekdayCounts) {
+        averages[day] = weekdayTotals[day] > 0 ? (weekdayCounts[day] / weekdayTotals[day]) : 0;
+    }
+
+    return averages;
+}
+
+function createChart3(ctx, tableData) {
+    const weekdayAverages = averageProceduresByWeekday(tableData);
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(weekdayAverages),
+            datasets: [{
+                label: 'Durchschnittliche Anzahl der Narkosen pro Wochentag',
+                data: Object.values(weekdayAverages),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.4)', // Rot
+                    'rgba(54, 162, 235, 0.4)', // Blau
+                    'rgba(255, 206, 86, 0.4)', // Gelb
+                    'rgba(75, 192, 192, 0.4)', // Grün
+                    'rgba(153, 102, 255, 0.4)', // Violett
+                    'rgba(255, 159, 64, 0.4)', // Orange
+                    'rgba(255, 105, 180, 0.4)'  // Helles Pink für Sonntag
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(255, 105, 180, 1)'  // Helles Pink für Sonntag
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+       
+function countDepartments(table) {
+    let departmentCounts = {};
+
+    const fachabteilungIndex = getColumnIndex('Fachabteilung');
+    if (fachabteilungIndex === -1) {
+        console.error("Spalte 'Fachabteilung' nicht gefunden.");
+        return departmentCounts;
+    }
+
+    for (let i = 1; i < table.rows.length; i++) { // Beginne bei Index 1, um die Kopfzeile zu überspringen
+        const department = table.rows[i].cells[fachabteilungIndex].textContent.trim();
+        departmentCounts[department] = (departmentCounts[department] || 0) + 1;
+    }
+
+    return departmentCounts;
+}
+
+
+
+
+function getSortedDepartmentData(table) {
+    const counts = countDepartments(table);
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]); // Sortiert nach Anzahl in absteigender Reihenfolge
+}
+
+function createChart4(ctx, tableData) {
+    const sortedData = getSortedDepartmentData(tableData);
+    const labels = sortedData.map(item => item[0]);
+    const data = sortedData.map(item => item[1]);
+
+    // Generieren von Farben für die Balken
+    const backgroundColors = [];
+    const borderColors = [];
+    for (let i = 0; i < data.length; i++) {
+        // Wechselnde Farben für jeden Balken
+        const r = Math.floor(Math.random() * 255);
+        const g = Math.floor(Math.random() * 255);
+        const b = Math.floor(Math.random() * 255);
+        backgroundColors.push(`rgba(${r}, ${g}, ${b}, 0.4)`); // Halbtransparent
+        borderColors.push(`rgba(${r}, ${g}, ${b}, 1)`);       // Vollfarbe
+    }
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Häufigkeit der Fachabteilungen',
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+
+function countRSI(table) {
+    let rsiCount = 0;
+
+    const anTeSonstigesIndex = getColumnIndex('AnTe Sonstiges');
+
+    if (anTeSonstigesIndex === -1) {
+        console.error(`Spalte 'AnTe Sonstiges' nicht gefunden.`);
+        return 0;
+    }
+
+    for (let i = 1; i < table.rows.length; i++) {
+        const columnValue = table.rows[i].cells[anTeSonstigesIndex].textContent.trim();
+        if (columnValue.includes("RSI")) {
+            rsiCount++;
+        }
+    }
+
+    return rsiCount;
+}
+
+
+
+        function calculateRSIPercentage(table) {
+    const totalRows = table.rows.length - 1; // Abzüglich der Kopfzeile
+    const rsiCount = countRSI(table);
+    return (rsiCount / totalRows) * 100; // Anteil in Prozent
+}
+
+function createChart5(ctx, tableData) {
+    const rsiPercentage = calculateRSIPercentage(tableData);
+    const otherPercentage = 100 - rsiPercentage;
+
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['RSI', 'Andere'],
+            datasets: [{
+                label: 'Anteil von RSI',
+                data: [rsiPercentage, otherPercentage],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 99, 132, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
+}
+
+function countAnesthesiaTypes(table) {
+    let counts = {
+        'Allgemeine Anästhesie': 0,
+        'Regionale Anästhesie': 0,
+        'Kombinierte Anästhesie': 0,
+        'Verfahren ohne Anästhesie': 0,
+        'Analgosedierung/Stand-by': 0,
+        'Nicht zugeordnet': 0
+    };
+
+    let unassignedData = [];
+
+    const weiterbildungIndex = getColumnIndex('Weiterbildung');
+    const anTeSonstigesIndex = getColumnIndex('AnTe Sonstiges');
+    const anTeRegionalIndex = getColumnIndex('AnTe Regional');
+
+    if (weiterbildungIndex === -1 || anTeSonstigesIndex === -1 || anTeRegionalIndex === -1) {
+        console.error(`Eine oder mehrere Spalten 'Weiterbildung', 'AnTe Sonstiges', 'AnTe Regional' nicht gefunden.`);
+        return counts;
+    }
+
+    for (let i = 1; i < table.rows.length; i++) {
+        const columnWeiterbildung = table.rows[i].cells[weiterbildungIndex].textContent.toLowerCase();
+        const columnAnTeSonstiges = table.rows[i].cells[anTeSonstigesIndex].textContent.toLowerCase();
+        const columnAnTeRegional = table.rows[i].cells[anTeRegionalIndex].textContent.toLowerCase();
+
+        const isGeneral = columnWeiterbildung.includes('allgemeinanästhesie') || columnAnTeSonstiges.includes('tiva') || columnAnTeSonstiges.includes('balanciert');
+        const isRegional = columnWeiterbildung.includes('rückenmarksnahe') || columnWeiterbildung.includes('periphere') || columnAnTeRegional.trim() !== '';
+        const isCombined = isGeneral && isRegional;
+        const isWithoutAnesthesia = columnWeiterbildung.includes('zentrale punktionen') && !isGeneral && !isRegional;
+        const isAnalgosedation = (columnAnTeSonstiges.includes('analgo') || columnAnTeSonstiges.includes('stand-by')) && !isGeneral && !isRegional;
+
+        if (isCombined) {
+            counts['Kombinierte Anästhesie']++;
+        } else if (isGeneral) {
+            counts['Allgemeine Anästhesie']++;
+        } else if (isRegional) {
+            counts['Regionale Anästhesie']++;
+        } else if (isAnalgosedation) {
+            counts['Analgosedierung/Stand-by']++;
+        } else if (isWithoutAnesthesia) {
+            counts['Verfahren ohne Anästhesie']++;
+        } else {
+            counts['Nicht zugeordnet']++;
+            unassignedData.push({
+                rowIndex: i,
+                columnAnTeSonstiges: table.rows[i].cells[anTeSonstigesIndex].textContent,
+                columnAnTeRegional: table.rows[i].cells[anTeRegionalIndex].textContent,
+                columnWeiterbildung: table.rows[i].cells[weiterbildungIndex].textContent
+            });
+        }
+    }
+
+    if (unassignedData.length > 0) {
+        console.log("Nicht zugeordnete Daten: ", unassignedData);
+    }
+
+    return counts;
+}
+
+
+
+
+
+
+function createChart6(ctx, tableData) {
+    const anesthesiaCounts = countAnesthesiaTypes(tableData);
+
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Allgemeine Anästhesie', 'Regionale Anästhesie', 'Kombinierte Anästhesie', 'Verfahren ohne Anästhesie', 'Analgosedierung/Stand-by', 'Nicht zugeordnet'],
+            datasets: [{
+                label: 'Anästhesiearten',
+                data: [
+                    anesthesiaCounts['Allgemeine Anästhesie'], 
+                    anesthesiaCounts['Regionale Anästhesie'], 
+                    anesthesiaCounts['Kombinierte Anästhesie'],
+                    anesthesiaCounts['Verfahren ohne Anästhesie'],
+                    anesthesiaCounts['Analgosedierung/Stand-by'],
+                    anesthesiaCounts['Nicht zugeordnet']
+                ],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(201, 203, 207, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(201, 203, 207, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
+}
+
+function countTivaBalanced(table) {
+    let counts = {
+        'TIVA': 0,
+        'Balanciert': 0,
+        'Beides': 0
+    };
+
+    const anTeSonstigesIndex = getColumnIndex('AnTe Sonstiges');
+
+    if (anTeSonstigesIndex === -1) {
+        console.error(`Spalte 'AnTe Sonstiges' nicht gefunden.`);
+        return counts;
+    }
+
+    for (let i = 1; i < table.rows.length; i++) {
+        const columnValue = table.rows[i].cells[anTeSonstigesIndex].textContent.toLowerCase();
+
+        const hasTiva = columnValue.includes('tiva');
+        const hasBalanced = columnValue.includes('balanciert');
+
+        if (hasTiva && hasBalanced) {
+            counts['Beides']++;
+        } else if (hasTiva) {
+            counts['TIVA']++;
+        } else if (hasBalanced) {
+            counts['Balanciert']++;
+        }
+    }
+
+    return counts;
+}
+
+
+        function createChart7(ctx, tableData) {
+    const tivaBalancedCounts = countTivaBalanced(tableData);
+
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['TIVA', 'Balanciert', 'Beides'],
+            datasets: [{
+                label: 'Anästhesie Typen',
+                data: [tivaBalancedCounts['TIVA'], tivaBalancedCounts['Balanciert'], tivaBalancedCounts['Beides']],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
+}
+
+
+
+
+// Fügen Sie hier ähnliche Funktionen für die restlichen Diagramme hinzu
+
+function closeChartModal() {
+    if (currentChart) {
+        currentChart.destroy();
+    }
+    document.getElementById('chartModal').style.display = 'none';
+}
+
+   function openInfoPopup() {
+    document.getElementById('infoModal').style.display = 'block';
+}
+
+function closeInfoPopup() {
+    document.getElementById('infoModal').style.display = 'none';
+}
+ function openCPRInfoPopup() {
+    document.getElementById('cprInfoModal').style.display = 'block';
+}
+
+function closeCPRInfoPopup() {
+    document.getElementById('cprInfoModal').style.display = 'none';
+}    
+        
+function openCatheterInfoPopup() {
+    document.getElementById('catheterInfoModal').style.display = 'block';
+}
+
+function closeCatheterInfoPopup() {
+    document.getElementById('catheterInfoModal').style.display = 'none';
+}
+function openTransfusionInfoPopup() {
+    document.getElementById('transfusionInfoModal').style.display = 'block';
+}
+
+function closeTransfusionInfoPopup() {
+    document.getElementById('transfusionInfoModal').style.display = 'none';
+}
+        
+function openASA3InfoPopup() {
+    document.getElementById('asa3InfoModal').style.display = 'block';
+}
+
+function closeASA3InfoPopup() {
+    document.getElementById('asa3InfoModal').style.display = 'none';
+}
+
+   
+    </script>
+</body>
+</html>
