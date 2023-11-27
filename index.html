@@ -669,8 +669,8 @@ function calculateCount(table, columnIndex, searchString) {
     }
     return count;
 }
-        function calculateProjection(table) {
-    const earliestDate = findEarliestDate(table);
+function calculateProjection(table) {
+    const earliestDate = findEarliestDate(table); // Diese Funktion muss das früheste Datum aus der Tabelle extrahieren
     const projectionElement = document.getElementById('projection'); 
 
     if (earliestDate) {
@@ -683,24 +683,29 @@ function calculateCount(table, columnIndex, searchString) {
         const formattedEarliestDate = earliestDate.toLocaleDateString('de-DE', formatOptions);
         const formattedProjectionDate = projectionDate.toLocaleDateString('de-DE', formatOptions);
 
+        // Berechnung der Tage und der aktuellen Rate
+        const daysSinceEarliest = (currentDate - earliestDate) / (1000 * 60 * 60 * 24);
+        const daysTotal = (projectionDate - earliestDate) / (1000 * 60 * 60 * 24);
+        const currentRate = rowCount / daysSinceEarliest;
+
+        // Extrapolation der Rate bis zum Projektionsdatum
+        const projectedCount = currentRate * daysTotal;
+
         if (currentDate > projectionDate) {
             projectionElement.textContent = `Du hast deine Weiterbildungszeit bereits voll. Du hast ${rowCount} Verfahren durchgeführt. Dein erstes Verfahren war am ${formattedEarliestDate}.`;
         } else {
-            const daysSinceEarliest = (currentDate - earliestDate) / (1000 * 60 * 60 * 24);
-            const daysTotal = (projectionDate - earliestDate) / (1000 * 60 * 60 * 24);
-            const projectedCount = 1800 * daysSinceEarliest / daysTotal;
-
             if (rowCount >= projectedCount) {
                 projectionElement.textContent = `Noaice! Deine erste Narkose war am ${formattedEarliestDate}. Wenn du so weiter machst, hast du am ${formattedProjectionDate} insgesamt ${Math.round(projectedCount)} Verfahren durchgeführt.`;
             } else {
-                const missingCount = 1800 - Math.round(projectedCount);
-                projectionElement.textContent = `Obacht Mensch! Deine erste Narkose war am ${formattedEarliestDate}. Wenn du so weiter machst wie bisher, hast du am ${formattedProjectionDate} nur ${Math.round(projectedCount)} erreicht. Dann fehlen dir noch ${missingCount} Verfahren.`;
+                const missingCount = projectedCount - rowCount;
+                projectionElement.textContent = `Obacht Mensch! Deine erste Narkose war am ${formattedEarliestDate}. Wenn du so weiter machst wie bisher, hast du am ${formattedProjectionDate} nur ${Math.round(projectedCount)} erreicht. Dann fehlen dir noch ${Math.round(missingCount)} Verfahren.`;
             }
         }
     } else {
         projectionElement.textContent = 'Kein gültiges Datum in der Tabelle gefunden.';
     }
 }
+
 
 function findEarliestDate(table) {
     let earliestDate = null;
